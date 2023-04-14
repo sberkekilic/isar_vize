@@ -2,15 +2,12 @@
 
 A new Flutter project.
 
-## Getting Started
+## Amaç
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+- Döviz verilerini seçilen tarihe göre listelesin.
+- Döviz verilerini internetten alsın.
+- Seçtiğimiz tarihte 00:00 ile 24:00 arasındaki her saat başı veriyi getirsin.
+- Tarih seçme sayfası syncfusion_rangePicker ile yapılsın.
+- Saat başı veriyi gösterme sayfası ise chart ile gösterilsin.
+- Sayfalar arası geçişi GoRouter ile yapılsın.(Örnek:/dolar/01-01-2023, /dolar/tarih-sec/, /ana-sayfa/doviz-sec/)
+- Yukarıdan da anlaşılacağı gibi ana sayfada döviz seçilsin, ondan sonra tarih seçilsin ve sonrasında dolar verisi chart ile listelensin.
