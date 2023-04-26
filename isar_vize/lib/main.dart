@@ -1,5 +1,6 @@
+import 'dart:async';
 import 'dart:io';
-
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -11,7 +12,6 @@ import 'collection/dolar_tl.dart';
 void main() async {
   // Isar veritabanını açın
   final isar = await Isar.open([DolarTLSchema]);
-
   runApp(MyApp(isar: isar));
 }
 
@@ -42,17 +42,23 @@ class ExchangeRatesScreen extends StatefulWidget {
 }
 
 class _ExchangeRatesScreenState extends State<ExchangeRatesScreen> {
+  String connectionStatus = "---";
+  late StreamSubscription subscription;
   @override
   void initState() {
     super.initState();
     //createIsarDatabaseBackup(); sadece BACKUP zamanı
     //fetchExchangeRateData(); sadece İnternet veri çekileceği zaman
+    subscription = Connectivity().onConnectivityChanged.listen((ConnectivityResult result) {
+      print("New connectivity status: $result");
+    });
   }
 
   @override
   void dispose() {
     widget.isar.close();
     super.dispose();
+    subscription.cancel();
   }
 
   Future<void> createIsarDatabaseBackup() async {
@@ -106,6 +112,26 @@ class _ExchangeRatesScreenState extends State<ExchangeRatesScreen> {
     }
   }
 
+  void checkInternetStatus() async {
+    var connectivityResult = await (Connectivity().checkConnectivity());
+    if (connectivityResult == ConnectivityResult.mobile) {
+      print("Connected to a mobile network");
+      setState(() {
+        connectionStatus = "Connected to a mobile network";
+      });
+    } else if (connectivityResult == ConnectivityResult.wifi) {
+      print("Connected to a wifi network");
+      setState(() {
+        connectionStatus = "Connected to a wifi network";
+      });
+    } else {
+      setState(() {
+        connectionStatus = "Not connected to the internet";
+      });
+    }
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -113,16 +139,26 @@ class _ExchangeRatesScreenState extends State<ExchangeRatesScreen> {
         title: Text('Ana Menü'),
       ),
       body: Center(
-        child: ElevatedButton(
-          onPressed: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => DolarPage(isar: widget.isar),
-              ),
-            );
-          },
-          child: Text('Dolar'),
-        )
+        child: Column(
+          children: [
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => DolarPage(isar: widget.isar),
+                  ),
+                );
+              },
+              child: Text('Dolar'),
+            ),
+            ElevatedButton(
+                onPressed: checkInternetStatus,
+                child: Text("İnternet Kontrol")
+            ),
+            SizedBox(height: 20,),
+            Text(connectionStatus, style: TextStyle(fontSize: 18),)
+          ],
+        ),
       ),
     );
   }
