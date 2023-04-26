@@ -1,11 +1,11 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:isar/isar.dart';
 import 'package:intl/intl.dart';
+import 'package:isar_vize/pages/dolar-page.dart';
 import 'collection/dolar_tl.dart';
 
 void main() async {
@@ -46,6 +46,7 @@ class _ExchangeRatesScreenState extends State<ExchangeRatesScreen> {
   void initState() {
     super.initState();
     //createIsarDatabaseBackup(); sadece BACKUP zamanı
+    //fetchExchangeRateData(); sadece İnternet veri çekileceği zaman
   }
 
   @override
@@ -69,7 +70,7 @@ class _ExchangeRatesScreenState extends State<ExchangeRatesScreen> {
 
   Future<void> fetchExchangeRateData() async {
     final startDate = DateTime.parse('2023-01-01');
-    final endDate = DateTime.parse('2023-04-01');
+    final endDate = DateTime.parse('2023-02-01');
 
     for (var date = startDate; date.isBefore(endDate); date = date.add(Duration(days: 1))) {
       final formattedDate = DateFormat('yyyy-MM-dd').format(date);
@@ -105,17 +106,23 @@ class _ExchangeRatesScreenState extends State<ExchangeRatesScreen> {
     }
   }
 
-
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Exchange Rates'),
+        title: Text('Ana Menü'),
       ),
       body: Center(
-        child: Text('Exchange Rates data will be displayed here.'),
+        child: ElevatedButton(
+          onPressed: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => DolarPage(isar: widget.isar),
+              ),
+            );
+          },
+          child: Text('Dolar'),
+        )
       ),
     );
   }

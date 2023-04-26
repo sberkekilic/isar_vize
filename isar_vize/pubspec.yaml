@@ -38,6 +38,12 @@ dependencies:
   isar: ^3.0.5
   isar_flutter_libs: ^3.0.5
   http: ^0.13.5
+  sqflite: ^2.2.7
+  intl: ^0.18.1
+  get_it: ^7.2.0
+  path_provider: ^2.0.14
+  syncfusion_flutter_datepicker: ^21.1.41
+  syncfusion_flutter_charts: ^21.1.41
 
 dev_dependencies:
   flutter_test:
