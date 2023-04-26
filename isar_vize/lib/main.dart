@@ -2,39 +2,70 @@ import 'dart:async';
 import 'dart:io';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:isar/isar.dart';
 import 'package:intl/intl.dart';
+import 'package:isar_vize/pages/dolar-chart-page.dart';
 import 'package:isar_vize/pages/dolar-page.dart';
 import 'collection/dolar_tl.dart';
 
 void main() async {
   // Isar veritabanını açın
   final isar = await Isar.open([DolarTLSchema]);
-  runApp(MyApp(isar: isar));
+  final dolarList = await isar.dolarTLs.where().sortByDate().findAll();
+  runApp(MyApp(isar: isar, dolarList : dolarList));
 }
 
 class MyApp extends StatelessWidget {
   final Isar isar;
+  final GoRouter _router;
+  MyApp({required this.isar, required List<DolarTL> dolarList})
+  //GOROUTER TANIMLAMASI
+      : _router = GoRouter(
+    routes: <RouteBase>[
+      GoRoute(
+        path: '/',
+        builder: (BuildContext context, GoRouterState state) {
+          return ExchangeRatesScreen(isar: isar);
+        },
+        routes: <RouteBase>[
+          GoRoute(
+            path: 'dolar',
+            builder: (BuildContext context, GoRouterState state) {
+              return DolarPage(isar: isar);
+            },
+            routes: <RouteBase>[
+              GoRoute(
+                path: 'grafik',
+                pageBuilder: (context, state) => MaterialPage(
+                  key: state.pageKey,
+                  child: DolarChartPage(
+                    dolarList: dolarList, // Add null check
+                    isar: isar,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    ],
+  );
 
-  MyApp({required this.isar});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Exchange Rates',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: ExchangeRatesScreen(isar: isar),
+    return MaterialApp.router(
+      routerConfig: _router,
     );
   }
 }
 
+
 class ExchangeRatesScreen extends StatefulWidget {
   final Isar isar;
-
   ExchangeRatesScreen({required this.isar});
 
   @override
@@ -142,13 +173,7 @@ class _ExchangeRatesScreenState extends State<ExchangeRatesScreen> {
         child: Column(
           children: [
             ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => DolarPage(isar: widget.isar),
-                  ),
-                );
-              },
+              onPressed: () => context.go('/dolar'),
               child: Text('Dolar'),
             ),
             ElevatedButton(

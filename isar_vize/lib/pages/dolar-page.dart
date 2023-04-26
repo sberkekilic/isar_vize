@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:isar/isar.dart';
 import 'package:isar_vize/pages/dolar-chart-page.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
-
 import '../collection/dolar_tl.dart';
 
 class DolarPage extends StatefulWidget {
   final Isar isar;
+
   const DolarPage({Key? key, required this.isar}) : super(key: key);
 
   @override
@@ -15,23 +16,27 @@ class DolarPage extends StatefulWidget {
 }
 
 class _DolarPageState extends State<DolarPage> {
-  late List<DolarTL> _dolarList;
-  late DateTime _selectedDate;
-  late double _selectedRate;
+  List<DolarTL> _dolarList = [];
+  DateTime _selectedDate = DateTime.now();
+  double _selectedRate = 0.0;
 
   @override
   void initState() {
     super.initState();
-    _dolarList = [];
-    _selectedDate = DateTime.now();
-    _selectedRate = 0.0;
     _loadDolarData();
   }
 
   Future<void> _loadDolarData() async {
-    _dolarList =
-    await widget.isar.dolarTLs.where().sortByDate().findAll();
-    setState(() {});
+    final dolarList = await widget.isar.dolarTLs.where().sortByDate().findAll();
+    setState(() {
+      _dolarList = dolarList;
+      final selectedDateString = DateFormat('yyyy-MM-dd').format(_selectedDate);
+      final selectedDolar = _dolarList.firstWhere(
+            (d) => d.date == selectedDateString,
+        orElse: () => DolarTL(rate: null),
+      );
+      _selectedRate = selectedDolar.rate ?? 0.0;
+    });
   }
 
   void _onSelectionChanged(DateRangePickerSelectionChangedArgs args) {
@@ -41,7 +46,7 @@ class _DolarPageState extends State<DolarPage> {
         final dateFormat = DateFormat('yyyy-MM-dd');
         final selectedDateString = dateFormat.format(_selectedDate);
         final selectedDolar = _dolarList.firstWhere(
-              (d) => d.date == selectedDateString,
+          (d) => d.date == selectedDateString,
           orElse: () => DolarTL(rate: null),
         );
         _selectedRate = selectedDolar.rate ?? 0.0;
@@ -49,15 +54,13 @@ class _DolarPageState extends State<DolarPage> {
     });
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Dolar List'),
-      ),
-      body: Column(
-        children: [
+        appBar: AppBar(
+          title: Text('Dolar List'),
+        ),
+        body: Column(children: [
           SfDateRangePicker(
             onSelectionChanged: _onSelectionChanged,
             selectionMode: DateRangePickerSelectionMode.single,
@@ -76,16 +79,11 @@ class _DolarPageState extends State<DolarPage> {
             'Selected rate: $_selectedRate',
             style: TextStyle(fontSize: 18),
           ),
-          ElevatedButton(onPressed: (){
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => DolarChartPage(isar: widget.isar, dolarList: _dolarList),
-              ),
-            );
-          },
-              child: Text("Grafik"))
-        ],
-      ),
-    );
+          ElevatedButton(
+            onPressed: () =>
+                context.go('/dolar/grafik', extra: {'dolarList': '_dolarList', 'isar': 'widget.isar'}),
+            child: Text('Grafik'),
+          )
+        ]));
   }
 }

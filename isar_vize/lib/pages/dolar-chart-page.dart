@@ -6,25 +6,29 @@ import '../collection/dolar_tl.dart';
 
 class DolarChartPage extends StatefulWidget {
   final List<DolarTL> dolarList;
-  const DolarChartPage({Key? key, required this.dolarList, required Isar isar}) : super(key: key);
+  final Isar isar;
+  const DolarChartPage({Key? key, required this.dolarList, required this.isar}) : super(key: key);
 
   @override
   _DolarChartPageState createState() => _DolarChartPageState();
 }
 
 class _DolarChartPageState extends State<DolarChartPage> {
-  late List<_ChartData> _chartData;
-  late TooltipBehavior _tooltipBehavior;
+  List<_ChartData> _chartData = [];
+  TooltipBehavior _tooltipBehavior = TooltipBehavior(enable: true);
 
   @override
   void initState() {
     super.initState();
+    _updateChartData();
+  }
+
+  void _updateChartData() {
     _chartData = widget.dolarList.map((dolar) {
       final dateFormat = DateFormat('yyyy-MM-dd');
       final dateTime = dateFormat.parse(dolar.date!);
       return _ChartData(dateTime, dolar.rate ?? 0.0);
     }).toList();
-    _tooltipBehavior = TooltipBehavior(enable: true);
   }
 
   @override
